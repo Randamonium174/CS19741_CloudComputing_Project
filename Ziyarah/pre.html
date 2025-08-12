@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ziyara — Your Pre-Registered QR</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --deep1:#2e1a47;
+      --deep2:#0b0f1a;
+      --gold:#d4af37;
+      --muted: rgba(255,255,255,0.9);
+    }
+    body {
+      background: linear-gradient(135deg,var(--deep1) 0%, #1a1530 40%, var(--deep2) 100%);
+      color: var(--muted);
+      min-height: 100vh;
+      font-family: "Poppins", sans-serif;
+    }
+    .logo {
+      width:56px;height:56px;border-radius:10px;
+      background:linear-gradient(135deg,var(--gold), #ffdd66);
+      display:flex;align-items:center;justify-content:center;
+      color:#111;font-weight:700;font-family: serif;
+      box-shadow:0 6px 18px rgba(0,0,0,0.4);
+    }
+    .tagline {
+      color:rgba(255,255,255,0.8);
+      font-size:0.95rem;
+    }
+    .panel {
+      border: 2px solid var(--gold);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.06));
+      border-radius: 12px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 8px 30px rgba(0,0,0,0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="container my-3">
+    <div class="d-flex align-items-center">
+      <div class="logo me-3">Z</div>
+      <div>
+        <h1 class="mb-0">Ziyara</h1>
+        <div class="tagline">Where Every Visitor Feels Expected</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container text-center">
+    <section class="hero p-4 mb-4">
+      <h2>Your Pre-Registered QR</h2>
+      <p>Show this QR code at the reception to check in.</p>
+    </section>
+
+    <section class="panel mx-auto p-4" style="max-width: 400px;">
+      <div id="qr-display" class="mb-3"></div>
+      <button id="download-link" class="btn btn-warning">
+        <i class="fa fa-download"></i> Download Full Pass
+      </button>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="container text-start my-4">
+    © 2025 Ziyara • Azure-powered • Demo Mode
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- QR Code Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    // Visitor details
+    const visitorData = {
+      name: "Mr.Randamonium",
+      id: "ZYA-2025-00123",
+      purpose: "Business Meeting",
+      validUntil: "11 Aug 2025, 5:00 PM"
+    };
+
+    // Generate only QR for display
+    QRCode.toCanvas(visitorData.id, { width: 200 }, function(err, canvas) {
+      if (!err) {
+        document.getElementById("qr-display").appendChild(canvas);
+      }
+    });
+
+    // On download → create stylish pass
+    document.getElementById("download-link").addEventListener("click", function() {
+      const passCanvas = document.createElement("canvas");
+      passCanvas.width = 400;
+      passCanvas.height = 550;
+      const ctx = passCanvas.getContext("2d");
+
+      // Rounded card background
+      ctx.fillStyle = "#2e1a47";
+      ctx.beginPath();
+      ctx.moveTo(20, 0);
+      ctx.lineTo(passCanvas.width - 20, 0);
+      ctx.quadraticCurveTo(passCanvas.width, 0, passCanvas.width, 20);
+      ctx.lineTo(passCanvas.width, passCanvas.height - 20);
+      ctx.quadraticCurveTo(passCanvas.width, passCanvas.height, passCanvas.width - 20, passCanvas.height);
+      ctx.lineTo(20, passCanvas.height);
+      ctx.quadraticCurveTo(0, passCanvas.height, 0, passCanvas.height - 20);
+      ctx.lineTo(0, 20);
+      ctx.quadraticCurveTo(0, 0, 20, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Gold border
+      ctx.strokeStyle = "#d4af37";
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      // Header
+      ctx.fillStyle = "#d4af37";
+      ctx.font = "bold 26px Poppins";
+      ctx.textAlign = "center";
+      ctx.fillText("Ziyara Guest Pass", passCanvas.width / 2, 40);
+
+      // Photo placeholder
+      ctx.strokeStyle = "#d4af37";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(passCanvas.width / 2 - 50, 60, 100, 100);
+      ctx.fillStyle = "#999";
+      ctx.font = "12px Poppins";
+      ctx.fillText("Photo", passCanvas.width / 2, 115);
+
+      // Visitor details
+      ctx.fillStyle = "white";
+      ctx.font = "bold 20px Poppins";
+      ctx.fillText(visitorData.name, passCanvas.width / 2, 200);
+
+      ctx.font = "14px Poppins";
+      ctx.fillText(visitorData.id, passCanvas.width / 2, 225);
+      ctx.fillText(visitorData.purpose, passCanvas.width / 2, 250);
+      ctx.fillText(`Valid Until: ${visitorData.validUntil}`, passCanvas.width / 2, 275);
+
+      // Generate QR for pass
+      QRCode.toDataURL(visitorData.id, { width: 150 }, function(err, url) {
+        if (err) return console.error(err);
+        const qrImg = new Image();
+        qrImg.onload = function() {
+          ctx.drawImage(qrImg, passCanvas.width / 2 - 75, 300, 150, 150);
+
+          // Footer
+          ctx.fillStyle = "#888";
+          ctx.font = "12px Poppins";
+          ctx.fillText("Powered by Ziyara", passCanvas.width / 2, 520);
+
+          // Download image
+          const link = document.createElement("a");
+          link.href = passCanvas.toDataURL("image/png");
+          link.download = "ziyara-pass.png";
+          link.click();
+        };
+        qrImg.src = url;
+      });
+    });
+  </script>
+
+</body>
+</html>

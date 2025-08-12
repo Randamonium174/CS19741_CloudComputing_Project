@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ziyara — Walk-In Registration</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- QR library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --deep1:#2e1a47;
+      --deep2:#0b0f1a;
+      --gold:#d4af37;
+      --muted: rgba(255,255,255,0.9);
+    }
+    body {
+      background: linear-gradient(135deg,var(--deep1) 0%, #1a1530 40%, var(--deep2) 100%);
+      color: var(--muted);
+      min-height: 100vh;
+      font-family: "Poppins", sans-serif;
+      display:flex;
+      flex-direction:column;
+    }
+    header, footer {
+      max-width:1100px;
+      margin:auto;
+      width:100%;
+    }
+    .logo {
+      width:56px;height:56px;border-radius:10px;
+      background:linear-gradient(135deg,var(--gold), #ffdd66);
+      display:flex;align-items:center;justify-content:center;
+      color:#111;font-weight:700;font-family: serif;
+      box-shadow:0 6px 18px rgba(0,0,0,0.4);
+    }
+    .tagline { color:rgba(255,255,255,0.8);font-size:0.95rem }
+
+    main.container {
+      max-width:1100px;
+      margin:auto;
+      padding:20px;
+      flex:1;
+    }
+
+    .card-app {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+      border: 2px solid rgba(255,255,255,0.03);
+      border-radius:14px;
+      padding:18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    }
+
+    .panel {
+      border: 2px solid var(--gold);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.06));
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 8px 30px rgba(0,0,0,0.4);
+    }
+
+    .qr-box {
+      background:white;
+      border-radius:10px;
+      padding:8px;
+      display:inline-block;
+      box-shadow:0 6px 18px rgba(0,0,0,0.3);
+    }
+
+    .btn-gold {
+      background: linear-gradient(90deg, var(--gold), #b48828);
+      color: #111;
+      font-weight:700;
+      border:none;
+      border-radius:8px;
+    }
+    .btn-gold:active { transform:translateY(1px) }
+
+    .small-muted { color: rgba(255,255,255,0.7); font-size:0.9rem; }
+
+    /* pass preview */
+    #pass-preview {
+      width:100%;
+      max-width:360px;
+      border-radius:12px;
+      display:block;
+      margin:auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* responsive adjustments */
+    @media (max-width:900px){
+      .layout-grid { display:block; }
+      .form-col, .preview-col { width:100%; }
+    }
+    @media (min-width:901px){
+      .layout-grid { display:flex; gap:24px; align-items:flex-start; }
+      .form-col { flex:1 1 520px; }
+      .preview-col { width:380px; flex:0 0 380px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header (keeps the site structure) -->
+  <header class="container my-3">
+    <div class="d-flex align-items-center">
+      <div class="logo me-3">Z</div>
+      <div>
+        <h1 class="mb-0">Ziyara</h1>
+        <div class="tagline">Where Every Visitor Feels Expected</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="container">
+    <div class="card-app">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h3 class="mb-0"><i class="fa fa-walking"></i> Walk-In Registration</h3>
+          <div class="small-muted">Quickly register a visitor and generate a secure pass</div>
+        </div>
+        <div class="small-muted">* Photo is required</div>
+      </div>
+
+      <div class="layout-grid">
+        <!-- FORM -->
+        <div class="form-col panel">
+          <form id="walkin-form" novalidate>
+            <div class="mb-3">
+              <label class="form-label">Full name</label>
+              <input id="input-name" type="text" class="form-control" placeholder="Visitor full name" required>
+              <div class="invalid-feedback">Name is required.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Purpose of visit</label>
+              <input id="input-purpose" type="text" class="form-control" placeholder="e.g. Meeting / Interview" required>
+              <div class="invalid-feedback">Purpose is required.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Valid until - Date</label>
+              <input id="input-valid-date" type="date" class="form-control" required>
+              <div class="invalid-feedback">Please select a valid date.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Valid until - Time</label>
+              <input id="input-valid-time" type="time" class="form-control" required>
+              <div class="invalid-feedback">Please select a valid time.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Upload photo (JPG/PNG)</label>
+              <input id="input-photo" type="file" accept="image/*" class="form-control" required>
+              <div class="invalid-feedback">Photo is required.</div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button id="generate-btn" type="button" class="btn btn-gold">
+                <i class="fa fa-check-circle"></i> Generate Pass
+              </button>
+              <button id="reset-btn" type="button" class="btn btn-outline-light">
+                <i class="fa fa-eraser"></i> Reset
+              </button>
+            </div>
+            <div class="mt-3 small-muted">
+              After generating, use <strong>Download Pass</strong> to save the badge or print it.
+            </div>
+          </form>
+        </div>
+
+        <!-- PREVIEW & ACTIONS -->
+        <div class="preview-col panel text-center">
+          <div class="mb-3">
+            <div class="qr-box mb-2" id="qr-display" style="width: auto; height: auto;"></div>
+            <div class="small-muted">Scanable QR (contains all visitor details)</div>
+          </div>
+
+          <img id="pass-preview" alt="Pass preview (will appear here)" src="" style="display:none;">
+
+          <div class="mt-3">
+            <button id="download-btn" class="btn btn-gold w-100" disabled>
+              <i class="fa fa-download"></i> Download Pass
+            </button>
+            <button id="print-btn" class="btn btn-outline-light w-100 mt-2" disabled>
+              <i class="fa fa-print"></i> Print Pass
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer (keeps structure) -->
+  <footer class="container text-start my-4">
+    © 2025 Ziyara • Azure-powered • Demo Mode
+  </footer>
+
+  <!-- Hidden canvas for pass generation -->
+  <canvas id="pass-canvas" width="420" height="600" style="display:none;"></canvas>
+
+  <script>
+    // ---------- helpers ----------
+    function uid() {
+      // simple unique id (timestamp + random)
+      return 'ZYA-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    }
+
+    function formatTime12Hour(time24) {
+      // time24 in "HH:MM" 24-hour format string
+      const [hourStr, minuteStr] = time24.split(':');
+      let hour = parseInt(hourStr, 10);
+      const minute = minuteStr;
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12;
+      if (hour === 0) hour = 12;
+      return `${hour}:${minute} ${ampm}`;
+    }
+
+    function formatDateTimeLocal(dateStr, timeStr) {
+      const date = new Date(dateStr);
+      if (isNaN(date)) return '';
+      const formattedDate = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      const formattedTime = formatTime12Hour(timeStr);
+      return `${formattedDate}, ${formattedTime}`;
+    }
+
+    // ---------- elements ----------
+    const inputName = document.getElementById('input-name');
+    const inputPurpose = document.getElementById('input-purpose');
+    const inputValidDate = document.getElementById('input-valid-date');
+    const inputValidTime = document.getElementById('input-valid-time');
+    const inputPhoto = document.getElementById('input-photo');
+    const generateBtn = document.getElementById('generate-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    const qrDisplay = document.getElementById('qr-display');
+    const passPreviewImg = document.getElementById('pass-preview');
+    const downloadBtn = document.getElementById('download-btn');
+    const printBtn = document.getElementById('print-btn');
+
+    const passCanvas = document.getElementById('pass-canvas');
+    const ctx = passCanvas.getContext('2d');
+
+    // state
+    let currentVisitor = null; // object with all data
+    let currentPhotoDataUrl = null; // dataURL of uploaded photo
+    let currentPassDataUrl = null; // resulting pass PNG dataURL
+
+    // validate file input and read image
+    inputPhoto.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      currentPhotoDataUrl = null;
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload a valid image file.');
+        inputPhoto.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        currentPhotoDataUrl = ev.target.result; // base64 dataURL
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // reset
+    resetBtn.addEventListener('click', () => {
+      document.getElementById('walkin-form').reset();
+      qrDisplay.innerHTML = '';
+      passPreviewImg.style.display = 'none';
+      passPreviewImg.src = '';
+      downloadBtn.disabled = true;
+      printBtn.disabled = true;
+      currentVisitor = null;
+      currentPhotoDataUrl = null;
+      currentPassDataUrl = null;
+    });
+
+    // generate
+    generateBtn.addEventListener('click', async () => {
+      // front-end validation
+      const name = inputName.value.trim();
+      const purpose = inputPurpose.value.trim();
+      const validDate = inputValidDate.value;
+      const validTime = inputValidTime.value;
+
+      if (!name) { inputName.classList.add('is-invalid'); inputName.focus(); return; } else { inputName.classList.remove('is-invalid'); }
+      if (!purpose) { inputPurpose.classList.add('is-invalid'); inputPurpose.focus(); return; } else { inputPurpose.classList.remove('is-invalid'); }
+      if (!validDate) { inputValidDate.classList.add('is-invalid'); inputValidDate.focus(); return; } else { inputValidDate.classList.remove('is-invalid'); }
+      if (!validTime) { inputValidTime.classList.add('is-invalid'); inputValidTime.focus(); return; } else { inputValidTime.classList.remove('is-invalid'); }
+      if (!currentPhotoDataUrl) { inputPhoto.classList.add('is-invalid'); inputPhoto.focus(); alert('Please upload a photo (required).'); return; } else { inputPhoto.classList.remove('is-invalid'); }
+
+      // build visitor object (all details)
+      const visitorId = uid();
+      const validUntilStr = formatDateTimeLocal(validDate, validTime);
+      currentVisitor = {
+        name,
+        id: visitorId,
+        purpose,
+        validUntil: validUntilStr,
+        ts: new Date().toISOString()
+      };
+
+      // create QR with full JSON payload
+      const payload = JSON.stringify(currentVisitor);
+
+      // render QR in qrDisplay (clear first)
+      qrDisplay.innerHTML = '';
+      QRCode.toCanvas(document.createElement('canvas'), payload, { width: 200, margin: 2 }, function (err, canvas) {
+        if (err) {
+          console.error(err);
+          alert('Failed to create QR code.');
+          return;
+        }
+        qrDisplay.appendChild(canvas);
+      });
+
+      // draw the pass on the hidden canvas
+      await drawPassToCanvas(currentVisitor, currentPhotoDataUrl);
+
+      // preview pass image
+      currentPassDataUrl = passCanvas.toDataURL('image/png');
+      passPreviewImg.src = currentPassDataUrl;
+      passPreviewImg.style.display = 'block';
+
+      // enable download/print
+      downloadBtn.disabled = false;
+      printBtn.disabled = false;
+    });
+
+    // download pass
+    downloadBtn.addEventListener('click', () => {
+      if (!currentPassDataUrl) return;
+      const a = document.createElement('a');
+      a.href = currentPassDataUrl;
+      a.download = `${currentVisitor.id}-ziyara-pass.png`;
+      a.click();
+    });
+
+    // print pass (opens image in new window for printing)
+    printBtn.addEventListener('click', () => {
+      if (!currentPassDataUrl) return;
+      const w = window.open('');
+      w.document.write(`<img src="${currentPassDataUrl}" style="max-width:100%;width:420px">`);
+      w.document.title = 'Print - Ziyara Pass';
+      w.focus();
+      setTimeout(() => w.print(), 300);
+    });
+
+    // draw pass function: draws the card with photo, details, and QR
+    async function drawPassToCanvas(visitor, photoDataUrl) {
+      // clear
+      ctx.clearRect(0,0,passCanvas.width, passCanvas.height);
+
+      // background with soft gradient
+      const g = ctx.createLinearGradient(0,0,0,passCanvas.height);
+      g.addColorStop(0, '#2e1a47');
+      g.addColorStop(1, '#0b0f1a');
+      ctx.fillStyle = g;
+
+      // rounded rect background
+      roundRect(ctx, 8, 8, passCanvas.width - 16, passCanvas.height - 16, 20, true, false);
+
+      // gold outer border
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 6;
+      roundRect(ctx, 8, 8, passCanvas.width - 16, passCanvas.height - 16, 20, false, true);
+
+      // header bar
+      ctx.fillStyle = '#d4af37';
+      ctx.fillRect(28, 28, passCanvas.width - 56, 60);
+      ctx.fillStyle = '#111';
+      ctx.font = '600 20px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ZIYARA GUEST PASS', passCanvas.width / 2, 28 + 40);
+
+      // photo placeholder (left)
+      const photoX = 40;
+      const photoY = 110;
+      const photoW = 120;
+      const photoH = 140;
+      // draw photo background box
+      ctx.fillStyle = '#fff';
+      roundRect(ctx, photoX, photoY, photoW, photoH, 10, true, false);
+
+      // draw uploaded photo if available
+      if (photoDataUrl) {
+        await drawImageFromDataUrl(ctx, photoDataUrl, photoX+4, photoY+4, photoW-8, photoH-8);
+      } else {
+        // text placeholder
+        ctx.fillStyle = '#bbb';
+        ctx.font = '14px Poppins';
+        ctx.textAlign = 'center';
+        ctx.fillText('Photo', photoX + photoW/2, photoY + photoH/2);
+      }
+
+      // visitor details area (right)
+      const infoX = photoX + photoW + 20;
+      const infoY = photoY;
+      const infoW = passCanvas.width - infoX - 40;
+
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.font = '600 22px Poppins';
+      ctx.fillText(visitor.name, infoX, infoY + 28);
+
+      ctx.font = '500 14px Poppins';
+      ctx.fillStyle = '#e8e8e8';
+      ctx.fillText(`ID: ${visitor.id}`, infoX, infoY + 58);
+
+      ctx.fillText(`Purpose: ${visitor.purpose}`, infoX, infoY + 88);
+
+      ctx.fillText(`Valid: ${visitor.validUntil}`, infoX, infoY + 118);
+
+      // small timestamp
+      ctx.font = '12px Poppins';
+      ctx.fillStyle = '#bbb';
+      ctx.fillText(`Issued: ${new Date(visitor.ts).toLocaleString()}`, infoX, infoY + 150);
+
+      // draw QR code at bottom center
+      // Generate QR to canvas
+      const qrCanvas = document.createElement('canvas');
+      await new Promise((res, rej) => {
+        QRCode.toCanvas(qrCanvas, JSON.stringify(visitor), { width: 150, margin: 1 }, (err) => {
+          if (err) rej(err);
+          else res();
+        });
+      });
+      const qrX = (passCanvas.width - 150) / 2;
+      const qrY = passCanvas.height - 180;
+      ctx.drawImage(qrCanvas, qrX, qrY);
+
+      // label below QR
+      ctx.fillStyle = '#d4af37';
+      ctx.font = '600 14px Poppins';
+      ctx.textAlign = 'center';
+      ctx.fillText('Scan to Verify', passCanvas.width / 2, qrY + 170);
+    }
+
+    // helper to draw rounded rect
+    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+      if (typeof r === 'undefined') r = 5;
+      if (typeof fill === 'undefined') fill = true;
+      if (typeof stroke === 'undefined') stroke = false;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // helper to draw image from data URL with await
+    function drawImageFromDataUrl(ctx, dataUrl, x, y, w, h) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, x, y, w, h);
+          resolve();
+        };
+        img.onerror = () => {
+          console.warn('Failed to load photo for pass.');
+          resolve();
+        };
+        img.src = dataUrl;
+      });
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ziyara — Analytics Dashboard</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --deep1:#2e1a47;
+      --deep2:#0b0f1a;
+      --gold:#d4af37;
+      --muted: rgba(255,255,255,0.85);
+    }
+    body {
+      background: linear-gradient(135deg,var(--deep1) 0%, #1a1530 40%, var(--deep2) 100%);
+      color: var(--muted);
+      min-height: 100vh;
+      font-family: "Poppins", sans-serif;
+      padding: 20px;
+    }
+    header {
+      max-width: 1100px;
+      margin: auto 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo {
+      width: 48px; height: 48px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--gold), #ffdd66);
+      display: flex; align-items: center; justify-content: center;
+      color: #111; font-weight: 700; font-family: serif;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+      font-size: 24px;
+    }
+    h1 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 1.8rem;
+      color: var(--gold);
+    }
+    .tagline {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+      margin-left: auto;
+      font-style: italic;
+      font-weight: 400;
+    }
+    main {
+      max-width: 1100px;
+      margin: auto;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      padding: 25px 30px;
+    }
+    .card-summary {
+      background: rgba(255,255,255,0.04);
+      border: 1.8px solid var(--gold);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--gold);
+      box-shadow: 0 6px 12px rgba(212,175,55,0.3);
+      font-weight: 600;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.3s ease;
+      height: 100px;
+      justify-content: space-between;
+    }
+    .card-summary:hover {
+      background: rgba(255,255,255,0.08);
+    }
+    .card-summary i {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .card-summary .label {
+      flex-grow: 1;
+      color: var(--gold);
+      font-weight: 500;
+      font-size: 1rem;
+      padding-left: 10px;
+    }
+    .card-summary .value {
+      font-size: 1.5rem;
+      color: white;
+      font-weight: 700;
+      min-width: 50px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .section-title {
+      color: var(--gold);
+      margin: 30px 0 18px;
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+    .chart-container {
+      background: rgba(255,255,255,0.02);
+      border-radius: 14px;
+      padding: 18px 22px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
+    }
+    footer {
+      max-width: 1100px;
+      margin: 20px auto 10px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">Z</div>
+    <h1>Ziyara</h1>
+    <div class="tagline">Visitor Analytics</div>
+  </header>
+
+  <main>
+    <!-- Summary Cards -->
+    <div class="row g-3">
+      <div class="col-md-3 d-flex">
+        <div class="card-summary w-100">
+          <i class="fa fa-users"></i>
+          <div class="label">Total Visitors</div>
+          <div class="value" id="total-visitors">0</div>
+        </div>
+      </div>
+      <div class="col-md-3 d-flex">
+        <div class="card-summary w-100">
+          <i class="fa fa-check-circle"></i>
+          <div class="label">Checked-In</div>
+          <div class="value" id="checked-in">0</div>
+        </div>
+      </div>
+      <div class="col-md-3 d-flex">
+        <div class="card-summary w-100">
+          <i class="fa fa-clock"></i>
+          <div class="label">Pending Check-Ins</div>
+          <div class="value" id="pending">0</div>
+        </div>
+      </div>
+      <div class="col-md-3 d-flex">
+        <div class="card-summary w-100">
+          <i class="fa fa-file-alt"></i>
+          <div class="label">Pre-Registrations</div>
+          <div class="value" id="pre-registrations">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visitor Trends Chart -->
+    <section>
+      <h3 class="section-title">Visitor Trends Over Last 7 Days</h3>
+      <div class="chart-container">
+        <canvas id="trendChart" height="140"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © 2025 Ziyara • Azure-powered • Demo Mode
+  </footer>
+
+  <script>
+    // Sample data (replace with real data source)
+    const sampleStats = {
+      totalVisitors: 100,
+      checkedIn: 175,
+      pending: 25,
+      preRegistrations: 45,
+      visitorTrends: {
+        labels: ['Aug 5', 'Aug 6', 'Aug 7', 'Aug 8', 'Aug 9', 'Aug 10', 'Aug 11'],
+        data: [30, 28, 32, 35, 40, 25, 55]
+      }
+    };
+
+    // Update summary cards
+    document.getElementById('total-visitors').textContent = sampleStats.totalVisitors;
+    document.getElementById('checked-in').textContent = sampleStats.checkedIn;
+    document.getElementById('pending').textContent = sampleStats.pending;
+    document.getElementById('pre-registrations').textContent = sampleStats.preRegistrations;
+
+    // Visitor Trends Line Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: sampleStats.visitorTrends.labels,
+        datasets: [{
+          // label removed for cleaner look
+          data: sampleStats.visitorTrends.data,
+          borderColor: '#d4af37',
+          backgroundColor: 'rgba(212, 175, 55, 0.25)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: 'white', font: { size: 12 } },
+            grid: { color: 'rgba(255,255,255,0.1)' }
+          },
+          x: {
+            ticks: { color: 'white', font: { size: 12 } },
+            grid: { color: 'rgba(255,255,255,0.1)' }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+          }
+        },
+      }
+    });
+  </script>
+
+</body>
+</html>
